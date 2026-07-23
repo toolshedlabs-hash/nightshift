@@ -136,14 +136,20 @@ better as four ideas you actually understand than as a framework you install and
 Every script here is short enough to read in a minute and change to fit your setup. That
 is the intent. Fork it, gut it, keep the two tools you like.
 
-## Pro pack (coming)
+## Pro pack
 
 We run a much harder version of this in production: a real cost governor that watches
 spend live, tighter loop-detection, verification gates that call a second agent to
 review the first one's work, and escalation rails that page a human the moment a run is
-stuck. We are packaging that up as a Pro pack for teams who want the hardened version
-instead of building it themselves. This free kit is the honest core of it, not a
-crippled teaser. If the Pro pack sounds useful, star the repo and it will find you.
+stuck. We packaged that up as a Pro pack for teams who want the hardened version instead
+of building it themselves. This free kit is the honest core of it, not a crippled teaser.
+
+It is 79 dollars, one payment, and you get the whole kit as a download (the tools, a
+worked example that drives a real agent, tests, and a setup guide). The honest test is
+simple: if the four free scripts already stop your bad nights, keep your money, you are
+done. If you would rather buy the hardened version than build it, it is here:
+
+https://buy.polar.sh/polar_cl_DNbM8mbdEhQCxB1SMjRclwzvTX5JsCMRzXDpw41hfow
 
 ## Who made this
 
