@@ -154,9 +154,10 @@ each unit is recorded, the ceiling can overshoot by up to one unit's cost.
 It is 79 dollars, one payment, and you get the whole kit as a download (the tools, a
 worked example that drives a real agent, tests, and a setup guide). The honest test is
 simple: if the four free scripts already stop your bad nights, keep your money, you are
-done. If you would rather buy the hardened version than build it, it is here:
+done. If you would rather buy the hardened version than build it, what it does and what
+it does not do is written up here:
 
-https://buy.polar.sh/polar_cl_DNbM8mbdEhQCxB1SMjRclwzvTX5JsCMRzXDpw41hfow
+https://nightshift.pagelens.dev
 
 If the download fails, or it is not what you expected, or you just changed your mind,
 email toolshedlabs@gmail.com within 30 days and we refund it. No argument, no form to
