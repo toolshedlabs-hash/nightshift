@@ -4,10 +4,10 @@ Patterns and small tools for running a coding agent unattended overnight without
 turning into a token bonfire.
 
 Leaving Claude Code (or any coding agent) running while you sleep is a great deal when
-it works. You wake up to real progress. It is a terrible deal when it does not, and the
-default is that it does not. The agent does not crash and stop. It keeps going for nine
-hours, confidently, on the wrong thing, or looping on an error it cannot see, spending
-money the entire time. In the morning you have a pile of unverified output and a bill.
+it works. You wake up to real progress. The way it fails is worse than most people brace
+for. A crash would be fine, you lose a few hours and start over. What actually happens is
+it keeps going for nine hours, confident and wrong, or loops on an error it cannot see and
+spends money on every retry. In the morning you have a pile of unverified output and a bill.
 
 This repo is the boring layer that makes the good outcome the normal one. No framework,
 no dependencies, no loop of its own. It assumes you already have a way to run the agent.
@@ -48,8 +48,8 @@ See [`bin/verify-gate`](bin/verify-gate).
 
 ### 3. Runaway awareness
 
-The expensive failure is not the crash. It is the run that works perfectly and does the
-wrong thing for hours. You want a hard ceiling so the worst possible night still has a
+The run that costs you is the one that works perfectly and does the wrong thing for six
+hours. A crash is cheap next to that. You want a hard ceiling so the worst possible night still has a
 bounded cost.
 
 Cap the loop three ways: a maximum number of iterations, a wall-clock deadline, and a
@@ -131,8 +131,8 @@ does not belong in your history.
 
 ## Why so small
 
-Because the hard part is not the code. It is the discipline, and discipline survives
-better as four ideas you actually understand than as a framework you install and forget.
+Because the hard part is the discipline, not the code, and discipline survives better as
+four ideas you actually understand than as a framework you install and forget.
 Every script here is short enough to read in a minute and change to fit your setup. That
 is the intent. Fork it, gut it, keep the two tools you like.
 
@@ -168,7 +168,7 @@ fill in. Same address for bugs and questions.
 Built by [toolshed](https://github.com/toolshedlabs-hash), maker pen name Cal. We make
 developer tools and we operate coding agents unattended, so we care a lot about the
 difference between an overnight run that pays off and one that just spends. If these
-patterns save you a bad morning, that is the whole idea.
+patterns save you a bad morning, good.
 
 Issues and pull requests welcome. If you have a pattern that has saved you on an
 unattended run, open one.
