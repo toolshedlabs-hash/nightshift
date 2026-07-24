@@ -138,11 +138,18 @@ is the intent. Fork it, gut it, keep the two tools you like.
 
 ## Pro pack
 
-We run a much harder version of this in production: a real cost governor that watches
-spend live, tighter loop-detection, verification gates that call a second agent to
-review the first one's work, and escalation rails that page a human the moment a run is
-stuck. We packaged that up as a Pro pack for teams who want the hardened version instead
-of building it themselves. This free kit is the honest core of it, not a crippled teaser.
+We built a harder version of this for our own overnight runs and packaged it as a Pro
+pack. What it adds: a cost governor with a real dollar ledger and a hard ceiling that
+fails closed, a supervisor that backs off and retries a rate limit or a crash instead of
+losing the night, a verification gate that runs named checks from config and writes a
+structured report, stuck-loop detection on top of the iteration and time caps, desktop,
+email and webhook escalation, and an orchestrator that runs all of it as one loop. This
+free kit is the honest core of it, not a crippled teaser.
+
+Two limits worth knowing before you spend anything. The ledger is manual: you feed it the
+numbers your run reports and it enforces the ceiling against that running total, so it
+cannot read your provider's live bill for you. And because the budget is checked after
+each unit is recorded, the ceiling can overshoot by up to one unit's cost.
 
 It is 79 dollars, one payment, and you get the whole kit as a download (the tools, a
 worked example that drives a real agent, tests, and a setup guide). The honest test is
@@ -150,6 +157,10 @@ simple: if the four free scripts already stop your bad nights, keep your money, 
 done. If you would rather buy the hardened version than build it, it is here:
 
 https://buy.polar.sh/polar_cl_DNbM8mbdEhQCxB1SMjRclwzvTX5JsCMRzXDpw41hfow
+
+If the download fails, or it is not what you expected, or you just changed your mind,
+email toolshedlabs@gmail.com within 30 days and we refund it. No argument, no form to
+fill in. Same address for bugs and questions.
 
 ## Who made this
 
