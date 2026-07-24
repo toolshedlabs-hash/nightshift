@@ -27,11 +27,16 @@ n_done=$(count done)
 n_block=$(count blocked)
 n_note=$(count note)
 n_cost=$(count cost)
+n_all=$(( n_done + n_block + n_note + n_cost ))
 first=$(head -n1 "$LOG" | cut -f1)
 last=$(tail -n1 "$LOG" | cut -f1)
 
 printf '# Morning brief\n\n'
-printf 'Window: %s to %s\n\n' "$first" "$last"
+if [ "$n_all" -gt 0 ]; then
+  printf 'Window: %s to %s\n\n' "$first" "$last"
+else
+  printf 'Window: nothing was logged. The run may not have started, or it never called nightlog.\n\n'
+fi
 printf 'Done: %s | Blocked: %s | Cost markers: %s | Notes: %s\n\n' "$n_done" "$n_block" "$n_cost" "$n_note"
 
 printf '## Decisions needed\n'

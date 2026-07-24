@@ -24,6 +24,10 @@ if [ "$#" -lt 1 ]; then
   exit 2
 fi
 
+if [ ! -x "$nightlog" ]; then
+  printf 'verify-gate: warning: no nightlog next to this script (%s), so gate results will not reach the morning brief.\n' "$nightlog" >&2
+fi
+
 log() { [ -x "$nightlog" ] && "$nightlog" "$1" "$2" || true; }
 
 fails=0
