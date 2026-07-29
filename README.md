@@ -151,7 +151,7 @@ numbers your run reports and it enforces the ceiling against that running total,
 cannot read your provider's live bill for you. And because the budget is checked after
 each unit is recorded, the ceiling can overshoot by up to one unit's cost.
 
-It is 79 dollars, one payment, and you get the whole kit as a download (the tools, a
+It is 5 dollars, one payment, and you get the whole kit as a download (the tools, a
 worked example that drives a real agent, tests, and a setup guide). The honest test is
 simple: if the four free scripts already stop your bad nights, keep your money, you are
 done. If you would rather buy the hardened version than build it, what it does and what
