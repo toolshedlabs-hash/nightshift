@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+# runaway-guard - call once per loop iteration; exits nonzero when the run should stop.
+#
+# The failure mode of an overnight agent is not crashing. It is running happily for
+# nine hours doing the wrong thing, or looping on an error, and burning tokens the
+# whole time. This guard puts a hard ceiling on the loop so a bad night has a bounded
+# cost. It stops on any of three conditions:
+#
+#   1. iteration cap       the loop has run enough times
+#   2. wall-clock deadline the run has been going too long
+#   3. a STOP file         a human (or a failed gate) asked it to halt
+#
+# Usage in a loop:
+#   while runaway-guard --max-iters 40 --max-minutes 480; do
+#     ... one bounded unit of work ...
+#   done
+#
+# Options:
+#   --max-iters N     stop after N iterations
+#   --max-minutes M   stop M minutes after the first call of this run
+#   --no-caps         allow a run bounded only by the STOP file (say so on purpose)
+#   -h, --help        print this header
+#
+# At least one cap is required. Without one it refuses to start, because an
+# unbounded loop is the exact thing this script exists to prevent.
+#
+# To halt a running loop by hand: touch "$NIGHTSHIFT_DIR/STOP"
+#
+# State (iteration counter, recorded deadline) lives in $NIGHTSHIFT_DIR
+# (default .nightshift). Delete that dir to reset the counters for a fresh run.
+set -euo pipefail
+
+NIGHTSHIFT_DIR="${NIGHTSHIFT_DIR:-.nightshift}"
+max_iters=0
+max_minutes=0
+no_caps=0
+
+is_num() { case "${1:-}" in '' | *[!0-9]*) return 1 ;; *) return 0 ;; esac; }
+die() { printf 'runaway-guard: %s\n' "$1" >&2; exit "${2:-2}"; }
+
+# Print the leading comment block as help, and nothing else.
+show_help() {
+  awk 'NR==1 {next} /^#/ {sub(/^# ?/, ""); print; next} {exit}' "$0"
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --max-iters)
+      is_num "${2:-}" || die "--max-iters needs a whole number, got '${2:-}'"
+      max_iters="$2"; shift 2 ;;
+    --max-minutes)
+      is_num "${2:-}" || die "--max-minutes needs a whole number, got '${2:-}'"
+      max_minutes="$2"; shift 2 ;;
+    --no-caps) no_caps=1; shift ;;
+    -h|--help) show_help; exit 0 ;;
+    *) die "unknown arg '$1'" ;;
+  esac
+done
+
+if [ "$max_iters" -eq 0 ] && [ "$max_minutes" -eq 0 ] && [ "$no_caps" -eq 0 ]; then
+  die "refusing to guard an unbounded loop. Pass --max-iters and/or --max-minutes, or --no-caps if the STOP file is genuinely your only limit."
+fi
+
+mkdir -p "$NIGHTSHIFT_DIR"
+iter_file="$NIGHTSHIFT_DIR/iter"
+deadline_file="$NIGHTSHIFT_DIR/deadline"
+stop_file="$NIGHTSHIFT_DIR/STOP"
+now="$(date +%s)"
+
+# Kill switch first, so it always wins.
+if [ -f "$stop_file" ]; then
+  echo "runaway-guard: STOP file present ($stop_file). Halting." >&2
+  exit 1
+fi
+
+# Wall-clock deadline, recorded on the first call of the run.
+if [ "$max_minutes" -gt 0 ]; then
+  deadline=""
+  if [ -f "$deadline_file" ]; then
+    deadline="$(cat "$deadline_file" 2>/dev/null || true)"
+    if ! is_num "$deadline"; then
+      echo "runaway-guard: deadline file was not a timestamp, rewriting it." >&2
+      deadline=""
+    fi
+  fi
+  if [ -z "$deadline" ]; then
+    deadline=$(( now + max_minutes * 60 ))
+    echo "$deadline" > "$deadline_file"
+  fi
+  if [ "$now" -ge "$deadline" ]; then
+    echo "runaway-guard: wall-clock deadline reached. Halting." >&2
+    exit 1
+  fi
+fi
+
+# Iteration cap.
+iter=0
+if [ -f "$iter_file" ]; then
+  raw="$(cat "$iter_file" 2>/dev/null || true)"
+  if is_num "$raw"; then
+    iter="$raw"
+  else
+    echo "runaway-guard: iteration counter was not a number, restarting the count at 0." >&2
+  fi
+fi
+iter=$(( iter + 1 ))
+echo "$iter" > "$iter_file"
+if [ "$max_iters" -gt 0 ] && [ "$iter" -gt "$max_iters" ]; then
+  echo "runaway-guard: iteration cap ($max_iters) exceeded. Halting." >&2
+  exit 1
+fi
+
+exit 0

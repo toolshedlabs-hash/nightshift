@@ -2,11 +2,11 @@
 
 `npx skills add toolshedlabs-hash/nightshift`
 
-That places `skills/overnight-agent-guardrails/SKILL.md` where your agent can read it.
+That installs `overnight-agent-guardrails`, which carries the four bash scripts with it. Nothing else
+to fetch and nothing to build. They have no dependencies beyond bash and coreutils.
 
-The scripts themselves are plain bash in `bin/` and have no dependencies. You can also just clone the
-repo and wire them in by hand:
+If you would rather have the whole repo, including the worked example and the tests:
 
-    git clone --depth 1 https://github.com/toolshedlabs-hash/nightshift .nightshift
+    git clone --depth 1 https://github.com/toolshedlabs-hash/nightshift
 
 Nothing here runs a loop of its own. It wraps a loop you already have.

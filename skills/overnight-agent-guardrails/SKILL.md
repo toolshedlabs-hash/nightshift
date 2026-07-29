@@ -26,28 +26,32 @@ the run to be bounded, resumable and checkable afterwards.
 
 ## What to do
 
-1. Clone the tools into the project:
-   `git clone --depth 1 https://github.com/toolshedlabs-hash/nightshift .nightshift`
+The four scripts ship inside this skill directory, so there is nothing to fetch.
+Refer to them as `$SKILL_DIR` below, meaning the folder this file is in.
 
-2. Wrap the existing loop in the runaway guard. It exits nonzero when the run
-   should stop, so it goes in the `while` condition:
+1. Wrap the existing loop in the runaway guard. It exits nonzero when the run
+   should stop, so it belongs in the `while` condition:
    ```bash
-   while .nightshift/bin/runaway-guard --max-iters 40 --max-minutes 480; do
+   while "$SKILL_DIR/runaway-guard" --max-iters 40 --max-minutes 480; do
      ... one bounded unit of work ...
    done
    ```
    At least one cap is required. It refuses to start with none, because an
    unbounded loop is the thing it exists to prevent.
 
-3. Put the project's real checks behind the gate, so unchecked work is not
+2. Put the project's real checks behind the gate, so unchecked work is never
    accepted:
-   `.nightshift/bin/verify-gate "npm test" "npm run lint"`
-   Nonzero means stop or escalate rather than build more work on a broken base.
+   ```bash
+   "$SKILL_DIR/verify-gate" "npm test" "npm run lint"
+   ```
+   Nonzero means stop or escalate, rather than piling more work on a broken base.
 
-4. Write the handoff file at the end of every unit, rewritten not appended:
-   see `.nightshift/templates/HANDOFF.md`. A fresh run reads it and continues.
+3. Write the handoff file at the end of every unit of work, rewritten and not
+   appended. `HANDOFF.md` in this directory is the template. A fresh run reads
+   that one file and continues.
 
-5. Generate the morning brief from the log: `.nightshift/bin/morning-brief`.
+4. Record events as you go with `"$SKILL_DIR/nightlog"`, then produce the summary
+   with `"$SKILL_DIR/morning-brief"`. The verdict lands on the first line.
 
 ## Notes
 

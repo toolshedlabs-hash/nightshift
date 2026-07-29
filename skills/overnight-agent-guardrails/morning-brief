@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# morning-brief - render the night log into a short brief with a decision list on top.
+#
+# You should wake up to a page, not a scrollback. This reads the structured night log
+# and prints, in this order: the decisions waiting on you (blocked events), what got
+# done, any cost markers, and notes. Decisions come first on purpose, because that is
+# the only part that needs you before the next run.
+#
+# Usage:
+#   morning-brief [path/to/night.log] > MORNING-BRIEF.md
+#
+# Defaults to $NIGHTSHIFT_DIR/night.log (.nightshift/night.log).
+set -euo pipefail
+
+NIGHTSHIFT_DIR="${NIGHTSHIFT_DIR:-.nightshift}"
+LOG="${1:-$NIGHTSHIFT_DIR/night.log}"
+
+if [ ! -f "$LOG" ]; then
+  echo "morning-brief: no log found at $LOG" >&2
+  exit 1
+fi
+
+count() { awk -F'\t' -v lvl="$1" '$2==lvl{c++} END{print c+0}' "$LOG"; }
+emit()  { awk -F'\t' -v lvl="$1" '$2==lvl{printf "- %s  _(%s)_\n", $3, $1}' "$LOG"; }
+
+n_done=$(count done)
+n_block=$(count blocked)
+n_note=$(count note)
+n_cost=$(count cost)
+n_all=$(( n_done + n_block + n_note + n_cost ))
+first=$(head -n1 "$LOG" | cut -f1)
+last=$(tail -n1 "$LOG" | cut -f1)
+
+printf '# Morning brief\n\n'
+if [ "$n_all" -gt 0 ]; then
+  printf 'Window: %s to %s\n\n' "$first" "$last"
+else
+  printf 'Window: nothing was logged. The run may not have started, or it never called nightlog.\n\n'
+fi
+printf 'Done: %s | Blocked: %s | Cost markers: %s | Notes: %s\n\n' "$n_done" "$n_block" "$n_cost" "$n_note"
+
+printf '## Decisions needed\n'
+if [ "$n_block" -gt 0 ]; then emit blocked; else printf -- '- none. Nothing is waiting on you.\n'; fi
+
+printf '\n## Done overnight\n'
+if [ "$n_done" -gt 0 ]; then emit done; else printf -- '- (nothing logged as done)\n'; fi
+
+if [ "$n_cost" -gt 0 ]; then
+  printf '\n## Cost and usage\n'
+  emit cost
+fi
+
+if [ "$n_note" -gt 0 ]; then
+  printf '\n## Notes\n'
+  emit note
+fi

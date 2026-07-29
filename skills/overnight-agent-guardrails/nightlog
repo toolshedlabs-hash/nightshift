@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# nightlog - append one structured event to the night log.
+#
+# An unattended run should narrate itself as it goes, in a format a machine can
+# summarize later. That summary is your morning brief. Call this whenever the run
+# finishes a unit, hits a wall, spends real money, or notices something.
+#
+# Usage:
+#   nightlog <done|blocked|note|cost> "message"
+#
+# Levels:
+#   done     a unit of work completed and verified
+#   blocked  the run is stuck and needs a human decision
+#   note     context worth keeping (a retry, a skipped step)
+#   cost     a spend or usage marker (tokens, dollars, API calls)
+#
+# The log is a tab-separated file at $NIGHTSHIFT_DIR/night.log
+# (default .nightshift/night.log). Each event is one line.
+set -euo pipefail
+
+NIGHTSHIFT_DIR="${NIGHTSHIFT_DIR:-.nightshift}"
+LOG="$NIGHTSHIFT_DIR/night.log"
+
+if [ "$#" -lt 2 ]; then
+  echo "usage: nightlog <done|blocked|note|cost> \"message\"" >&2
+  exit 2
+fi
+
+level="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+shift
+msg="$*"
+
+case "$level" in
+  done|blocked|note|cost) ;;
+  *) echo "nightlog: unknown level '$level' (use done|blocked|note|cost)" >&2; exit 2 ;;
+esac
+
+mkdir -p "$NIGHTSHIFT_DIR"
+ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+# Keep one event on one line: collapse tabs and newlines in the message.
+clean_msg="$(printf '%s' "$msg" | tr '\t\n' '  ')"
+printf '%s\t%s\t%s\n' "$ts" "$level" "$clean_msg" >> "$LOG"

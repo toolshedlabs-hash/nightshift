@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# verify-gate - run one or more checks and fail closed if any check fails.
+#
+# Overnight output should be verified, not trusted. An agent will happily report
+# success on code that does not compile. Put your real checks behind this gate
+# (build, tests, a linter, a smoke script) and only accept the work if they pass.
+# A failing gate logs a blocker so it shows up in the morning brief, and returns
+# nonzero so the loop can stop or escalate instead of building on a broken base.
+#
+# Usage:
+#   verify-gate "npm test" "npm run build" "./smoke.sh"
+#
+# Each argument is a shell command. The gate exits 0 only if every check passes.
+# Check output is sent to stderr so this command's own stdout stays clean.
+set -uo pipefail
+
+NIGHTSHIFT_DIR="${NIGHTSHIFT_DIR:-.nightshift}"
+mkdir -p "$NIGHTSHIFT_DIR"
+here="$(cd "$(dirname "$0")" && pwd)"
+nightlog="$here/nightlog"
+
+if [ "$#" -lt 1 ]; then
+  echo "usage: verify-gate <check-cmd> [check-cmd ...]" >&2
+  exit 2
+fi
+
+if [ ! -x "$nightlog" ]; then
+  printf 'verify-gate: warning: no nightlog next to this script (%s), so gate results will not reach the morning brief.\n' "$nightlog" >&2
+fi
+
+log() { [ -x "$nightlog" ] && "$nightlog" "$1" "$2" || true; }
+
+fails=0
+for cmd in "$@"; do
+  printf 'verify-gate: running: %s\n' "$cmd" >&2
+  if eval "$cmd" 1>&2; then
+    printf 'verify-gate: PASS  %s\n' "$cmd" >&2
+    log note "gate pass: $cmd"
+  else
+    printf 'verify-gate: FAIL  %s\n' "$cmd" >&2
+    fails=$(( fails + 1 ))
+    log blocked "gate FAIL: $cmd"
+  fi
+done
+
+if [ "$fails" -gt 0 ]; then
+  printf 'verify-gate: %d check(s) failed. Gate closed.\n' "$fails" >&2
+  exit 1
+fi
+printf 'verify-gate: all checks passed. Gate open.\n' >&2
+exit 0
