@@ -46,7 +46,7 @@ on. If they fail, stop or escalate instead of piling more work on a broken base.
 
 See [`bin/verify-gate`](bin/verify-gate).
 
-One refinement, suggested by @babyblueviper1 in #1. Build, test and lint tell you whether
+One refinement, suggested in [#1](https://github.com/toolshedlabs-hash/nightshift/issues/1). Build, test and lint tell you whether
 the code compiles. They do not tell you whether the agent should be doing the thing at
 all. On a night that touches something hard to undo, a production config change, a merge
 to a protected branch, a payment, the check you want runs before the action and makes a
